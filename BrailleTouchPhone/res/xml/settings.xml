@@ -1,0 +1,15 @@
+<PreferenceScreen
+        xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+            android:title="@string/sound_preferences_group_title">
+
+        <CheckBoxPreference
+                android:key="@string/sounds_enabled_key"
+                android:title="@string/sounds_enabled_text"
+                android:persistent="true"
+                android:defaultValue="true" />
+
+    </PreferenceCategory>
+    
+</PreferenceScreen>
