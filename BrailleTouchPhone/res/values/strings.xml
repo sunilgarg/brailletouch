@@ -6,6 +6,6 @@
     <!-- Preferences -->
     <string name="sound_preferences_group_title">Sounds</string>
     
-    <string name="sounds_enabled_text">Enable sounds!!!</string>
+    <string name="sounds_enabled_text">Enable sounds</string>
     <string name="sounds_enabled_key">sound_enabled</string>
 </resources>
