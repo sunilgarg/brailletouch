@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout 
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/braille_keyboard_root_layout"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:background="@android:color/black">
+
+	<FrameLayout
+		android:id="@+id/braille_keyboard_layout"
+		android:orientation="vertical"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:background="@android:color/black" />
+
+	<TextView
+    	android:id="@+id/braille_keyboard_letter_text"
+    	android:layout_width="fill_parent"
+    	android:layout_height="fill_parent"
+    	android:layout_gravity="center"
+    	android:gravity="center"
+    	android:textColor="#FFFFFFFF" 
+    	android:textSize="28sp" />
+	
+</FrameLayout>
