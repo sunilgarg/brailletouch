@@ -32,6 +32,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
 
@@ -79,11 +80,8 @@ public class BluetoothBrailleTestActivity extends Activity {
 			if (!empty) {
 				String info = ((TextView) v).getText().toString();
 				String address = info.substring(info.length() - 17);
-				Intent intent = new Intent();
-				intent.putExtra(DEVICE_ADDRESS, address);
-				setResult(Activity.RESULT_OK, intent);
+				Toast.makeText(BluetoothBrailleTestActivity.this, info, Toast.LENGTH_LONG).show();
 			}
-			finish();
 		}
 	};
 }
