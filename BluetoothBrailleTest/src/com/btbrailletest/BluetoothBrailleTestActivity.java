@@ -20,6 +20,7 @@
 
 package com.btbrailletest;
 
+import java.util.ArrayList;
 import java.util.Set;
 
 import android.app.Activity;
@@ -46,6 +47,8 @@ public class BluetoothBrailleTestActivity extends Activity {
 	private BluetoothAdapter btAdapter;
 	private ArrayAdapter<String> pairedDevicesAdapter;
 	private boolean empty;
+	ArrayList<BluetoothDevice> devices = new ArrayList<BluetoothDevice>();
+	ListView pairedListView;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +56,7 @@ public class BluetoothBrailleTestActivity extends Activity {
 		setContentView(R.layout.device_list);
 		setResult(Activity.RESULT_CANCELED);
 		pairedDevicesAdapter = new ArrayAdapter<String>(this, R.layout.device_name);
-		ListView pairedListView = (ListView) findViewById(R.id.paired_devices);
+		pairedListView = (ListView) findViewById(R.id.paired_devices);
 		pairedListView.setAdapter(pairedDevicesAdapter);
 		pairedListView.setOnItemClickListener(clickListener);
 		btAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -63,6 +66,7 @@ public class BluetoothBrailleTestActivity extends Activity {
 			findViewById(R.id.title_paired_devices).setVisibility(View.VISIBLE);
 			for (BluetoothDevice device : pairedDevices) {
 				pairedDevicesAdapter.add(device.getName() + "\n" + device.getAddress());
+				devices.add(device);
 			}
 		} else {
 			String noDevices = getResources().getText(R.string.none_paired).toString();
@@ -76,11 +80,18 @@ public class BluetoothBrailleTestActivity extends Activity {
 	}
 
 	private OnItemClickListener clickListener = new OnItemClickListener() {
-		public void onItemClick(AdapterView<?> av, View v, int arg2, long arg3) {
+		public void onItemClick(AdapterView<?> av, View v, int selPos, long arg3) {
 			if (!empty) {
+				BluetoothDevice device = devices.get(selPos);
 				String info = ((TextView) v).getText().toString();
 				String address = info.substring(info.length() - 17);
 				Toast.makeText(BluetoothBrailleTestActivity.this, info, Toast.LENGTH_LONG).show();
+				// Create an Intent to launch an Activity for the tab (to be reused)
+				Bundle bundle = new Bundle();
+				bundle.putParcelable("device", device);
+			    Intent intent = new Intent().setClass(BluetoothBrailleTestActivity.this, TouchPadActivity.class);
+			    intent.putExtras(bundle);
+			    startActivity(intent);
 			}
 		}
 	};
