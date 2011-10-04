@@ -7,6 +7,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import edu.gatech.ic.android.SerializableMotionEvent;
 
 public class TouchPadActivity extends Activity {
 	private ViewGroup frameLayout;
@@ -46,7 +47,12 @@ public class TouchPadActivity extends Activity {
 	};
 	
 	public void sendTouchEvent(MotionEvent event) {
-		//Implement
+		SerializableMotionEvent sme = new SerializableMotionEvent(event);
+		String json = sme.toJson();
+		
+		// the below lines are for testing purposes!
+		SerializableMotionEvent sme2 = SerializableMotionEvent.fromJson(json);
+		System.out.println("sme2 x " + sme2.getX() + " y " + sme2.getY());
 	}
 	
 	/** Called when the activity is first created. */
