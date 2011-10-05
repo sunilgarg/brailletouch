@@ -2,58 +2,22 @@ package com.btbrailletest;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
-import edu.gatech.ic.android.SerializableMotionEvent;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.Toast;
 
-public class TouchPadActivity extends Activity {
-	private ViewGroup frameLayout;
-	float x = 0;
-	float y = 0;
-	private TextView tv;
+public class TouchPadActivity extends Activity implements TextWatcher{
+	private EditText et;
 	BluetoothDevice device;
-	
-	private View.OnTouchListener touchListener = new View.OnTouchListener() {
-		@Override
-		public boolean onTouch(View v, MotionEvent event) {
-			int action = event.getAction();
-			switch(action & MotionEvent.ACTION_MASK) {
-				case MotionEvent.ACTION_DOWN:
-					// fall through
-				case MotionEvent.ACTION_POINTER_DOWN:
-					sendTouchEvent(event);
-					int pointerID = (event.getAction() & MotionEvent.ACTION_POINTER_ID_MASK) >> MotionEvent.ACTION_POINTER_ID_SHIFT;
-					int pointerIndex = event.findPointerIndex(pointerID);
-					if (pointerIndex == -1)
-						break;
-					x = event.getX(pointerIndex);
-					y = event.getY(pointerIndex);
-					tv.setText("X: " + x + " Y: " + y);
-					break;
-				case MotionEvent.ACTION_MOVE:
-					break;
-				case MotionEvent.ACTION_POINTER_UP:
-					break;
-				case MotionEvent.ACTION_UP:
-					System.out.println("X: " + x + " Y: " + y);
-					tv.setText("X: " + x + " Y: " + y);
-					break;
-			}
-			return true;
-		}
-	};
-	
-	public void sendTouchEvent(MotionEvent event) {
-		SerializableMotionEvent sme = new SerializableMotionEvent(event);
-		String json = sme.toJson();
-		
-		// the below lines are for testing purposes!
-		SerializableMotionEvent sme2 = SerializableMotionEvent.fromJson(json);
-		System.out.println("sme2 x " + sme2.getX() + " y " + sme2.getY());
-	}
 	
 	/** Called when the activity is first created. */
     @Override
@@ -64,11 +28,43 @@ public class TouchPadActivity extends Activity {
     	Bundle bundle = this.getIntent().getExtras();
     	device = (BluetoothDevice) bundle.get("device");
     	
-    	frameLayout = (ViewGroup) findViewById(R.id.touchpad_layout);
-    	frameLayout.setOnTouchListener(touchListener);
+    	this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
     	
-    	tv = (TextView) findViewById(R.id.touchpad_letter_layout);
-    	tv.setText(device.toString());
+    	et = (EditText) findViewById(R.id.touchpad_letter_layout);
+    	et.requestFocus();
+    	et.addTextChangedListener(this);
     }
+
+    /**
+     * Called when a character is entered.
+     */
+	@Override
+	public void onTextChanged(CharSequence s, int start, int before, int count) {
+		Toast.makeText(this, ""+s.charAt(start), Toast.LENGTH_SHORT).show();
+		char charToSend = s.charAt(start);
+		sendChar(charToSend);
+	}
+	
+	/**
+	 * Function to send char across bluetooth
+	 * @param charToSend
+	 */
+	public void sendChar(char charToSend) {
+		/**TODO 
+		 * Some one figure out bluetooth and implement it here. 
+		 * The variable "device" is the device chosen from
+		 * the list at the beginning of the app.
+		 */
+	}
+	
+	@Override
+	public void afterTextChanged(Editable s) {
+		//DO NOTHING
+	}
+
+	@Override
+	public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+		//DO NOTHING
+	}
 
 }

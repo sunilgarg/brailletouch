@@ -13,13 +13,11 @@
 		android:layout_height="fill_parent"
 		android:background="@android:color/black" />
 
-	<TextView
-    	android:id="@+id/touchpad_letter_layout"
-    	android:layout_width="fill_parent"
-    	android:layout_height="fill_parent"
-    	android:layout_gravity="center"
-    	android:gravity="center"
-    	android:textColor="#FFFFFFFF" 
-    	android:textSize="28sp" />
+	<EditText
+        android:id="@+id/touchpad_letter_layout"
+        android:textColor="#8c8989"
+        android:layout_width="250sp"
+        android:layout_height="wrap_content">
+    </EditText>
 	
 </FrameLayout>

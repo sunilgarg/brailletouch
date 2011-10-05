@@ -26,9 +26,11 @@ import java.util.Set;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -85,12 +87,14 @@ public class BluetoothBrailleTestActivity extends Activity {
 				BluetoothDevice device = devices.get(selPos);
 				String info = ((TextView) v).getText().toString();
 				String address = info.substring(info.length() - 17);
-				Toast.makeText(BluetoothBrailleTestActivity.this, info, Toast.LENGTH_LONG).show();
-				// Create an Intent to launch an Activity for the tab (to be reused)
+				//Toast.makeText(BluetoothBrailleTestActivity.this, info, Toast.LENGTH_LONG).show();
+				
+				// Create an Intent to launch the keyboard activity with the chosen device chosen
 				Bundle bundle = new Bundle();
 				bundle.putParcelable("device", device);
 			    Intent intent = new Intent().setClass(BluetoothBrailleTestActivity.this, TouchPadActivity.class);
 			    intent.putExtras(bundle);
+			    
 			    startActivity(intent);
 			}
 		}
