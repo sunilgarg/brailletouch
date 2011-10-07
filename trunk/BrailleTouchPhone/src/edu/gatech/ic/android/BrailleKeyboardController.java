@@ -123,15 +123,17 @@ public class BrailleKeyboardController extends InputMethodService {
 			
 			playSound(clickPlayer);
 			
-			keyDownUp(KeyEvent.KEYCODE_SPACE);
+			InputConnection connection = getCurrentInputConnection();
+			connection.commitText(" ", 1);
 		}
 
 		@Override
 		public void onBackspace() {
 			
-//			playSound(backspacePlayer);
+			playSound(backspacePlayer);
 			
-			keyDownUp(KeyEvent.KEYCODE_DEL);
+			InputConnection connection = getCurrentInputConnection();
+			connection.commitText("\b", 1);
 		}
 
 		@Override

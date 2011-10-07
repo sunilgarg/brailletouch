@@ -65,15 +65,21 @@ public class BrailleKeyboardView extends FrameLayout {
 			if (pointerIndex == null)
 				continue;
 			
-			float x = event.getX(currentIndex);
-			float y = event.getY(currentIndex);
+			try {
 			
-			Point currentPoint = currentLocations.get(pointerIndex);
-			
-			Boolean didUpdate = currentPoint.update(x, y);
-			
-			if (didUpdate) {
-				drawCircle(x, y, Color.GREEN, "");
+				float x = event.getX(i);
+				float y = event.getY(i);
+				
+				Point currentPoint = currentLocations.get(pointerIndex);
+				
+				Boolean didUpdate = currentPoint.update(x, y);
+				
+				if (didUpdate) {
+					drawCircle(x, y, Color.GREEN, "");
+				}
+				
+			} catch(Exception ex) {
+				Log.d(TAG, "Error while updating locations: " + ex);
 			}
 			
 		}
@@ -93,22 +99,26 @@ public class BrailleKeyboardView extends FrameLayout {
 			
 			Integer pointerIndex = mapLocation.get(currentIndex);
 			if (pointerIndex == null) {
-				Log.d(TAG, "CHRIS: pointer index is null");
 				continue;
 			}
 			
-			float x = event.getX(currentIndex);
-			float y = event.getY(currentIndex);
+			try {
 			
-			Point currentPoint = currentLocations.get(pointerIndex);
-			currentPoint.update(x, y);
-			currentPoint.setEnd();
-			
-			if (currentPoint.getEndTimeMS() > lastUpMS.longValue()) {
-				lastUpMS = currentPoint.getEndTimeMS();
+				float x = event.getX(i);
+				float y = event.getY(i);
+				
+				Point currentPoint = currentLocations.get(pointerIndex);
+				currentPoint.update(x, y);
+				currentPoint.setEnd();
+				
+				if (currentPoint.getEndTimeMS() > lastUpMS.longValue()) {
+					lastUpMS = currentPoint.getEndTimeMS();
+				}
+				
+				drawPoint(currentPoint, Color.RED);
+			} catch (Exception ex) {
+				Log.d(TAG, "Error updating up events: " + ex);
 			}
-			
-			drawPoint(currentPoint, Color.RED);
 		}
 		
 		return lastUpMS;
@@ -120,7 +130,6 @@ public class BrailleKeyboardView extends FrameLayout {
 		
 		for (Point point : currentLocations) {
 			
-			Log.d(TAG, "CHRIS: lastuptime: " + lastUpTime + " point uptime: " + point.getEndTimeMS() + " diff: " + (lastUpTime - point.getEndTimeMS()));
 			if ((lastUpTime - point.getEndTimeMS()) > MAX_TOUCH_TIME_DIFF_MS) {
 				pointsToRemove.add(point);
 			}
@@ -166,9 +175,9 @@ public class BrailleKeyboardView extends FrameLayout {
 					float x = event.getX(pointerIndex);
 					float y = event.getY(pointerIndex);
 					
-					Point point = new Point(x, y, pointerIndex);
+					Point point = new Point(x, y, pointerID);
 					drawPoint(point, Color.BLUE);
-					mapLocation.put(pointerIndex, currentLocations.size());
+					mapLocation.put(pointerID, currentLocations.size());
 					currentLocations.add(point);
 
 					break;

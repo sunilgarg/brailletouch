@@ -28,6 +28,7 @@ public class Point {
 		yDistTraveled = 0;
 		
 		startTimeMS = System.currentTimeMillis();
+		endTimeMS = 0L;
 	}
 	
 	public Boolean update(float x, float y) {
