@@ -29,6 +29,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -55,6 +56,8 @@ public class BluetoothBrailleTestActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+	
+		
 		setContentView(R.layout.device_list);
 		setResult(Activity.RESULT_CANCELED);
 		pairedDevicesAdapter = new ArrayAdapter<String>(this, R.layout.device_name);
@@ -76,6 +79,15 @@ public class BluetoothBrailleTestActivity extends Activity {
 		}
 	}
 
+	 @Override
+	    public void onStart() {
+	        super.onStart();
+	        Intent intent = new Intent().setClass(BluetoothBrailleTestActivity.this, TouchPadActivity.class);
+	    	startActivity(intent);
+	        finish();
+	    }
+	
+	
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
@@ -96,6 +108,7 @@ public class BluetoothBrailleTestActivity extends Activity {
 			    intent.putExtras(bundle);
 			    
 			    startActivity(intent);
+			    finish();
 			}
 		}
 	};
