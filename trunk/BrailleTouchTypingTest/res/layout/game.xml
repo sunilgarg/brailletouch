@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#ffffff"
+    android:orientation="vertical" android:weightSum="1">
+    <LinearLayout
+    	android:layout_height="wrap_content"
+    	android:layout_width="fill_parent"
+    	android:id="@+id/linearLayout1"
+    	android:orientation="vertical"
+    	android:layout_weight="0.45"></LinearLayout>
+    <TextView
+    	android:layout_height="wrap_content"
+    	android:id="@+id/targetWord"
+    	android:textAppearance="?android:attr/textAppearanceLarge"
+    	android:gravity="center_vertical|center_horizontal"
+    	android:layout_gravity="center"
+    	android:layout_weight="0.18"
+    	android:layout_width="220dp"
+    	android:textColor="#ff0000"></TextView>
+    <EditText
+    	android:id="@+id/enteredWord"
+    	android:layout_width="0dp" android:layout_height="3dp"></EditText>
+</LinearLayout>
