@@ -1,5 +1,7 @@
 package com.typingtest;
 
+import java.text.DecimalFormat;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
@@ -13,13 +15,15 @@ import android.widget.Toast;
 
 public class TypingTestGameActivity extends Activity implements TextWatcher {
 	
-	private TextView timerLabel, enteredWordLabel;
+	private TextView timerLabel, enteredWordLabel, errorPercentage, targetWordView;
 	private EditText enteredWord;
 	private Handler timerHandler = new Handler();
 	String targetWord;
-	String correctWord = "";
-	int targetWordIndex = 0;
-	private long startTime = 0;
+	String correctWord;
+	String words[];
+	int targetWordIndex;
+	float totalLetters, correctLetters, wrongLetters;
+	private long startTime;
 	
 	//Timer
     private Runnable updateTimer = new Runnable() {
@@ -50,22 +54,33 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
         //Get timer label
         timerLabel = (TextView) findViewById(R.id.timerLabel);
         enteredWordLabel = (TextView) findViewById(R.id.enteredWordLabel);
+        errorPercentage = (TextView) findViewById(R.id.errorPercentage);
+        targetWordView = (TextView) findViewById(R.id.targetWord);
+        enteredWord = (EditText) findViewById(R.id.enteredWord);
+        words = getResources().getStringArray(R.array.db);
         
-        final TextView errorPercentage = (TextView) findViewById(R.id.errorPercentage);
         errorPercentage.setText("Error Percentage: ");
         
-        final String words[] = getResources().getStringArray(R.array.db);
-        int random = 0 + (int)(Math.random()*words.length);
-        targetWord = words[random];
+        //Reset game labels
+        setupGame();
         
-        final TextView targetWordView = (TextView) findViewById(R.id.targetWord);
-        targetWordView.setText(targetWord);
+        //Reset statistics
+        totalLetters = 0;
+        correctLetters = 0;
+        wrongLetters = 0;
         
-        enteredWord = (EditText) findViewById(R.id.enteredWord);
-        enteredWord.requestFocus();
         enteredWord.addTextChangedListener(this);
-    	this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
     	startTimer();
+    }
+    
+    private void setupGame() {
+    	int random = 0 + (int)(Math.random()*words.length);
+        targetWord = words[random];
+        targetWordView.setText(targetWord);
+        enteredWordLabel.setText("");
+        enteredWord.setText("");
+        targetWordIndex = 0;
+        correctWord = "";
     }
     
     private void startTimer() {
@@ -74,28 +89,45 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
 		timerHandler.postDelayed(updateTimer, 100);
     }
     
+    private void updateError() {
+    	errorPercentage.setText("Percent Wrong: " + (new DecimalFormat("##").format((wrongLetters/totalLetters)*100)) + "%");
+    }
+    
     /**
      * Called when a character is entered.
      */
 	@Override
 	public void onTextChanged(CharSequence s, int start, int before, int count) {
-		String typed = ""+s.charAt(count-1);
-		Toast.makeText(this, typed, Toast.LENGTH_SHORT).show();
-		String typedText = "";
 		
-		if(typed.equalsIgnoreCase(String.valueOf(targetWord.charAt(targetWordIndex)))) {
-			correctWord += typed;
-			typedText = "<font color=#00ff00>" + correctWord + "</font>";
-			targetWordIndex++;
-		} else {
-			typedText = "<font color=#00ff00>" + correctWord + "</font><font color=#ff0000>" + typed + "</font>";
-		}
-		enteredWordLabel.setText(Html.fromHtml(typedText));
-		//TODO compare with target word and do some stuff
 	}
 	@Override
 	public void afterTextChanged(Editable s) {
-		//DO NOTHING
+		if(s.length() > 0) {
+			String typed = ""+s.charAt(s.length()-1);
+			Toast.makeText(this, typed, Toast.LENGTH_SHORT).show();
+			String typedText = "";
+			
+			//Show letters typed correctly in green, incorrect letter in red
+			if(typed.equalsIgnoreCase(String.valueOf(targetWord.charAt(targetWordIndex)))) {
+				correctWord += typed;
+				typedText = "<font color=#00ff00>" + correctWord + "</font>";
+				targetWordIndex++;
+				correctLetters += 1;
+			} else {
+				wrongLetters += 1;
+				typedText = "<font color=#00ff00>" + correctWord + "</font><font color=#ff0000>" + typed + "</font>";
+			}
+			enteredWordLabel.setText(Html.fromHtml(typedText));
+			
+			//Computer error percentage
+			totalLetters++;
+			updateError();
+			
+			//Check for word completed
+			if(correctWord.equalsIgnoreCase(targetWord)) {
+				setupGame();
+			}
+		}
 	}
 
 	@Override
