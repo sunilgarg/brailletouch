@@ -20,6 +20,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -50,6 +51,7 @@ public class TouchPadActivity extends Activity implements TextWatcher{
     private StringBuffer mOutStringBuffer;
     private String mConnectedDeviceName = null;
     private BluetoothAdapter mBluetoothAdapter = null;
+    private String lastString = "";
     
 	private EditText et;
 	
@@ -57,6 +59,11 @@ public class TouchPadActivity extends Activity implements TextWatcher{
     @Override
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
+    	
+    	//remove status bar
+    	requestWindowFeature(Window.FEATURE_NO_TITLE);
+        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
+    	
     	setContentView(R.layout.touchpad);
     	
     	PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
@@ -131,11 +138,25 @@ public class TouchPadActivity extends Activity implements TextWatcher{
      */
 	@Override
 	public void onTextChanged(CharSequence s, int start, int before, int count) {
-		Toast.makeText(this, ""+s.charAt(start), Toast.LENGTH_SHORT).show();
-		if (s.length() != 0)
+		//Toast.makeText(this, ""+s.charAt(start), Toast.LENGTH_SHORT).show();
+		
+		if (!(before == count)) //this takes care of the useless extra call for spacebar
 		{	
-		String stringToSend = s.toString();
-		sendString(stringToSend);
+		String currString = s.toString();
+			//backspace
+			if(currString.equals("\b")) {
+				sendString("\b");
+			}	
+			else if(currString.equals("\r"))
+			{
+				sendString("\r");
+			}
+			//letter added
+			else if(before-count == -1) //letter added
+			{
+				int i = start+count;
+				sendString(currString.substring(i-1,i));
+			}
 		}
 	}
 	
@@ -319,6 +340,15 @@ public class TouchPadActivity extends Activity implements TextWatcher{
         }
         return false;
     }
+    
+    
+    //DISABLE BACK BUTTON
+    @Override
+    public void onBackPressed() {
+
+       return;
+    }
+    
     
     @Override
 	protected void onDestroy() {
