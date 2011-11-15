@@ -4,15 +4,14 @@
     <string name="start">Start</string>
     <string name="game">GAME</string>
     <string-array name="db">
-        <item>text_string1</item>
-        <item>text_string2</item>
-        <item>text_string3</item>
-        <item>text_string4</item>
-        <item>text_string5</item>
-        <item>text_string6</item>
-        <item>text_string7</item>
-        <item>text_string8</item>
-        <item>text_string9</item>
-        <item>text_string0</item>
+        <item>the</item>
+        <item>quick</item>
+        <item>brown</item>
+        <item>fox</item>
+        <item>jumps</item>
+        <item>over</item>
+        <item>the</item>
+        <item>lazy</item>
+        <item>dog</item>
     </string-array>
 </resources>
