@@ -125,6 +125,7 @@ public class BrailleKeyboardController extends InputMethodService {
 			
 			InputConnection connection = getCurrentInputConnection();
 			connection.commitText(" ", 1);
+			//keyDownUp(KeyEvent.KEYCODE_SPACE);
 		}
 
 		@Override
@@ -134,15 +135,17 @@ public class BrailleKeyboardController extends InputMethodService {
 			
 			InputConnection connection = getCurrentInputConnection();
 			connection.commitText("\b", 1);
+			//keyDownUp(KeyEvent.KEYCODE_DEL);
 		}
 
 		@Override
 		public void onReturn() {
 			
 			playSound(returnPlayer);
-			
-			keyDownUp(KeyEvent.KEYCODE_ENTER);
-			handleClose();
+			InputConnection connection = getCurrentInputConnection();
+			connection.commitText("\r", 1);  // BrailleTouchFront will catch this and call keyDownUp on the front
+			//keyDownUp(KeyEvent.KEYCODE_ENTER);
+			//handleClose();
 		}
 
 		@Override
