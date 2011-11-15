@@ -22,6 +22,9 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
 	String correctWord;
 	String words[];
 	int targetWordIndex;
+	int totalSeconds = 0;
+	int completedWords = 0;
+	
 	float totalLetters, correctLetters, wrongLetters;
 	private long startTime;
 	
@@ -32,6 +35,7 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
 	       final long start = startTime;
 	       long millis = System.currentTimeMillis() - start;
 	       int seconds = (int) (millis / 1000);
+	       totalSeconds = seconds;
 	       int minutes = seconds / 60;
 	       seconds = seconds % 60;
 
@@ -59,7 +63,7 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
         enteredWord = (EditText) findViewById(R.id.enteredWord);
         words = getResources().getStringArray(R.array.db);
         
-        errorPercentage.setText("Error Percentage: ");
+        errorPercentage.setText("Error Percentage: " + "\nWPM: ");
         
         //Reset game labels
         setupGame();
@@ -90,7 +94,9 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
     }
     
     private void updateError() {
-    	errorPercentage.setText("Percent Wrong: " + (new DecimalFormat("##").format((wrongLetters/totalLetters)*100)) + "%");
+    	DecimalFormat format = new DecimalFormat("##");
+    	errorPercentage.setText("Percent Wrong: " + format.format((wrongLetters/totalLetters)*100) + "%" + "\n" +
+    							"WPM: " + format.format(((float)(completedWords*60)/totalSeconds)));
     }
     
     /**
@@ -126,6 +132,7 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
 			//Check for word completed
 			if(correctWord.equalsIgnoreCase(targetWord)) {
 				setupGame();
+				completedWords++;
 			}
 		}
 	}
