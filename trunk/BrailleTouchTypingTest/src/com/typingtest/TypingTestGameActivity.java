@@ -1,29 +1,42 @@
 package com.typingtest;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
+import android.view.animation.AnimationSet;
+import android.view.animation.ScaleAnimation;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class TypingTestGameActivity extends Activity implements TextWatcher {
 	
+	private PowerManager.WakeLock mWakeLock;
 	private TextView timerLabel, enteredWordLabel, errorPercentage, targetWordView;
-	private EditText enteredWord;
+	private EditText enteredWordBox;
 	private Handler timerHandler = new Handler();
+	private ArrayList<String> enteredWordHTML;
 	String targetWord;
 	String correctWord;
+	String enteredWord;
 	String words[];
 	int targetWordIndex;
 	int totalSeconds = 0;
 	int completedWords = 0;
+	ScaleAnimation completedAnimation;
+	AnimationSet completedAnimationSet; 
 	
 	float totalLetters, correctLetters, wrongLetters;
 	private long startTime;
@@ -55,13 +68,18 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.game);
         
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+    	mWakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK, "My Tag");
+		mWakeLock.acquire();
+        
         //Get timer label
         timerLabel = (TextView) findViewById(R.id.timerLabel);
         enteredWordLabel = (TextView) findViewById(R.id.enteredWordLabel);
         errorPercentage = (TextView) findViewById(R.id.errorPercentage);
         targetWordView = (TextView) findViewById(R.id.targetWord);
-        enteredWord = (EditText) findViewById(R.id.enteredWord);
+        enteredWordBox = (EditText) findViewById(R.id.enteredWord);
         words = getResources().getStringArray(R.array.db);
+        enteredWordHTML = new ArrayList<String>(); 
         
         errorPercentage.setText("Error Percentage: " + "\nWPM: ");
         
@@ -73,8 +91,36 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
         correctLetters = 0;
         wrongLetters = 0;
         
-        enteredWord.addTextChangedListener(this);
+        enteredWordBox.addTextChangedListener(this);
     	startTimer();
+    	
+    	//animation for when a word is completed
+    	completedAnimationSet = new AnimationSet(true);
+    	completedAnimation = new ScaleAnimation(1.0f, 1.0f, 1.0f, 2.0f);
+    	completedAnimation.setDuration(300);
+    	completedAnimation.setStartOffset(0);
+    	completedAnimation.setFillAfter(false);
+    	completedAnimationSet.addAnimation(completedAnimation);
+    	
+    	completedAnimation = new ScaleAnimation(1.0f, 1.0f, 1.0f, 0.5f);
+    	completedAnimation.setDuration(150);
+    	completedAnimation.setStartOffset(300);
+    	completedAnimation.setFillAfter(false);
+    	completedAnimationSet.addAnimation(completedAnimation);
+    	
+    	completedAnimationSet.setAnimationListener(new AnimationListener() {
+            public void onAnimationStart(Animation anim)
+            {
+            };
+            public void onAnimationRepeat(Animation anim)
+            {
+            };
+            public void onAnimationEnd(Animation anim)
+            {
+            	setupGame();
+				completedWords++;
+            };
+        });                 
     }
     
     private void setupGame() {
@@ -82,9 +128,11 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
         targetWord = words[random];
         targetWordView.setText(targetWord);
         enteredWordLabel.setText("");
-        enteredWord.setText("");
+        enteredWordBox.setText("");
         targetWordIndex = 0;
-        correctWord = "";
+        enteredWord = "";
+        enteredWordHTML.clear();
+ 
     }
     
     private void startTimer() {
@@ -108,37 +156,79 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
 	}
 	@Override
 	public void afterTextChanged(Editable s) {
-		if(s.length() > 0) {
-			String typed = ""+s.charAt(s.length()-1);
+	//this eventually needs to be adapted to receiving only individual chars, "\b" and "\r",
+	//which is how the bt comm works
+		
+	//takes care of useless calls - second condition corresponds to call that happens when keyboard is forced down
+	if ((s.length() == enteredWord.length()) || (enteredWord.length() - s.length() > 1) ) {
+		return;
+	}
+	else if (s.length() < enteredWord.length()){
+		//this is backspace - not sure if we want the game to have backspace enabled
+		if (targetWordIndex > 0) {
+		enteredWordHTML.remove(enteredWordHTML.size()-1);
+		enteredWord = enteredWord.substring(0,enteredWord.length()-1);
+		Toast.makeText(this, "backspace", Toast.LENGTH_SHORT).show();
+		targetWordIndex-=1;
+		}
+	}
+	else {
+		//new char added
+			String typed = String.valueOf(s.charAt(s.length()-1));
+			enteredWord += typed;
 			Toast.makeText(this, typed, Toast.LENGTH_SHORT).show();
-			String typedText = "";
+		
+				//Show letters typed correctly in green, incorrect letter in red
+				if(typed.equalsIgnoreCase(String.valueOf(targetWord.charAt(targetWordIndex)))) {
+					enteredWordHTML.add("<font color=#0000ff>" + typed + "</font>");
+					correctLetters += 1;
+				} else {
+					enteredWordHTML.add("<font color=#ff0000>" + typed + "</font>");
+					wrongLetters += 1;
+				}
+		targetWordIndex+=1;	
+				
+	}	
+	
+	enteredWord = String.valueOf(s);
+	//display word
+	String typedText = "";
+	for(int i = 0; i < enteredWordHTML.size(); i+=1) {
+		typedText += enteredWordHTML.get(i);
+	}
+	enteredWordLabel.setText(Html.fromHtml(typedText));
 			
-			//Show letters typed correctly in green, incorrect letter in red
-			if(typed.equalsIgnoreCase(String.valueOf(targetWord.charAt(targetWordIndex)))) {
-				correctWord += typed;
-				typedText = "<font color=#00ff00>" + correctWord + "</font>";
-				targetWordIndex++;
-				correctLetters += 1;
-			} else {
-				wrongLetters += 1;
-				typedText = "<font color=#00ff00>" + correctWord + "</font><font color=#ff0000>" + typed + "</font>";
-			}
-			enteredWordLabel.setText(Html.fromHtml(typedText));
-			
-			//Computer error percentage
-			totalLetters++;
+			//Compute error percentage
+			totalLetters = correctLetters + wrongLetters;
 			updateError();
 			
 			//Check for word completed
-			if(correctWord.equalsIgnoreCase(targetWord)) {
-				setupGame();
-				completedWords++;
+			if(targetWordIndex >= targetWord.length()) {
+				InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow(enteredWordLabel.getWindowToken(), 0);
+				enteredWordLabel.startAnimation(completedAnimationSet);
+				//defined in onCreate
+				/*
+				public void onAnimationEnd(Animation anim)
+	            {
+	            	setupGame();
+					completedWords++;
+	            };
+	            */
 			}
-		}
 	}
+	
 
 	@Override
 	public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 		//DO NOTHING
 	}
+	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		mWakeLock.release();
+		
+	}
+	
 }
