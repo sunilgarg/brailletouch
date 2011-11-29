@@ -1,5 +1,7 @@
 package com.typingtest;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
@@ -23,6 +25,9 @@ import android.widget.Toast;
 
 public class TypingTestGameActivity extends Activity implements TextWatcher {
 	
+	static final String DATAFILE = "typingTestStorage";
+	InputPhraseManager inputPhraseManager;
+	FileOutputStream dataLog;
 	private PowerManager.WakeLock mWakeLock;
 	private TextView timerLabel, enteredWordLabel, errorPercentage, targetWordView;
 	private EditText enteredWordBox;
@@ -71,6 +76,8 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
     	mWakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK, "My Tag");
 		mWakeLock.acquire();
+	
+		inputPhraseManager = new InputPhraseManager(this);
         
         //Get timer label
         timerLabel = (TextView) findViewById(R.id.timerLabel);
@@ -118,14 +125,24 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
             public void onAnimationEnd(Animation anim)
             {
             	setupGame();
-				completedWords++;
             };
-        });                 
+        });         
+    	
+    	//setup to write to file
+    	try {
+			dataLog = openFileOutput(DATAFILE, Context.MODE_PRIVATE);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+  
+    
     }
     
     private void setupGame() {
-    	int random = 0 + (int)(Math.random()*words.length);
-        targetWord = words[random];
+    	//int random = 0 + (int)(Math.random()*words.length);
+        //targetWord = words[random];
+    	targetWord = inputPhraseManager.getPhrase();
         targetWordView.setText(targetWord);
         enteredWordLabel.setText("");
         enteredWordBox.setText("");
@@ -144,7 +161,9 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
     private void updateError() {
     	DecimalFormat format = new DecimalFormat("##");
     	errorPercentage.setText("Percent Wrong: " + format.format((wrongLetters/totalLetters)*100) + "%" + "\n" +
-    							"WPM: " + format.format(((float)(completedWords*60)/totalSeconds)));
+    							"WPM: " + format.format((((float)completedWords*60f)/(float)totalSeconds)));
+    	
+   
     }
     
     /**
@@ -176,7 +195,7 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
 		//new char added
 			String typed = String.valueOf(s.charAt(s.length()-1));
 			enteredWord += typed;
-			Toast.makeText(this, typed, Toast.LENGTH_SHORT).show();
+			//Toast.makeText(this, typed, Toast.LENGTH_SHORT).show();
 		
 				//Show letters typed correctly in green, incorrect letter in red
 				if(typed.equalsIgnoreCase(String.valueOf(targetWord.charAt(targetWordIndex)))) {
@@ -200,6 +219,7 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
 			
 			//Compute error percentage
 			totalLetters = correctLetters + wrongLetters;
+			completedWords++;
 			updateError();
 			
 			//Check for word completed
@@ -212,7 +232,6 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
 				public void onAnimationEnd(Animation anim)
 	            {
 	            	setupGame();
-					completedWords++;
 	            };
 	            */
 			}
