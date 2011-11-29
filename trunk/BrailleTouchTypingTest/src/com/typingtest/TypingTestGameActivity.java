@@ -25,9 +25,9 @@ import android.widget.Toast;
 
 public class TypingTestGameActivity extends Activity implements TextWatcher {
 	
-	static final String DATAFILE = "typingTestStorage";
 	InputPhraseManager inputPhraseManager;
-	FileOutputStream dataLog;
+	DataLogger dataLogger;
+	
 	private PowerManager.WakeLock mWakeLock;
 	private TextView timerLabel, enteredWordLabel, errorPercentage, targetWordView;
 	private EditText enteredWordBox;
@@ -78,6 +78,7 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
 		mWakeLock.acquire();
 	
 		inputPhraseManager = new InputPhraseManager(this);
+		dataLogger = new DataLogger(this);
         
         //Get timer label
         timerLabel = (TextView) findViewById(R.id.timerLabel);
@@ -128,14 +129,6 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
             };
         });         
     	
-    	//setup to write to file
-    	try {
-			dataLog = openFileOutput(DATAFILE, Context.MODE_PRIVATE);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-  
     
     }
     
@@ -183,12 +176,15 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
 		return;
 	}
 	else if (s.length() < enteredWord.length()){
-		//this is backspace - not sure if we want the game to have backspace enabled
+		//this is backspace 
 		if (targetWordIndex > 0) {
 		enteredWordHTML.remove(enteredWordHTML.size()-1);
 		enteredWord = enteredWord.substring(0,enteredWord.length()-1);
 		Toast.makeText(this, "backspace", Toast.LENGTH_SHORT).show();
 		targetWordIndex-=1;
+		
+		//simulates data from back
+		dataLogger.addKeyStrokeToSessionLog("\b");
 		}
 	}
 	else {
@@ -206,6 +202,9 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
 					wrongLetters += 1;
 				}
 		targetWordIndex+=1;	
+		
+		//simulates data from back
+		dataLogger.addKeyStrokeToSessionLog(typed);
 				
 	}	
 	
@@ -224,6 +223,10 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
 			
 			//Check for word completed
 			if(targetWordIndex >= targetWord.length()) {
+				//simulates data from back
+				dataLogger.addKeyStrokeToSessionLog("\r");
+				
+				
 				InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
 				imm.hideSoftInputFromWindow(enteredWordLabel.getWindowToken(), 0);
 				enteredWordLabel.startAnimation(completedAnimationSet);
