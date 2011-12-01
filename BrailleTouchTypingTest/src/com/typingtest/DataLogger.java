@@ -87,6 +87,15 @@ public class DataLogger {
 		}
 		
 	}
+	
+	public String getSessionCharListAsString() {
+		String retString = "";
+		for(int i = 0; i < sessionLogCharList.size(); i++) {
+			retString += sessionLogCharList.get(i);
+		}
+		
+		return retString;
+	}
 
 }
 
