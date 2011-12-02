@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -81,6 +82,10 @@ public class DataLogger {
 	}
 	
 	public void addKeyStrokeToSessionLog(String in) {
+		addKeyStrokeToSessionLog(in,"",0,0);
+	}
+	
+	public void addKeyStrokeToSessionLog(String in, String targetPhrase, float wpm, double totalError) {
 		long nanos = System.nanoTime();
 		char key;
 		String line;
@@ -106,16 +111,22 @@ public class DataLogger {
 		sessionLogChars += String.valueOf(key);
 		
 		if(in.equals("\r")) {
-			addWordToSessionLog();
 			sessionLogCharsSave = sessionLogChars;
 			sessionLogChars = "";
-			sessionLogCharList.clear();
 		}
 		
 	}
 	
 	//we should make this function the Activities responsibility to call - can pass target phrase, WPM, etc.
-	private void addWordToSessionLog() {
+	public void addWordToSessionLog(String targetPhrase, float wpm, double totalError) {
+		DecimalFormat format = new DecimalFormat("##.##");
+		String firstLine = "'" + targetPhrase + "' WPM: " + format.format(wpm) + " Total Error: " + format.format(totalError*100) + "% \n";
+		try {
+			SDsessionLogOut.write(firstLine);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		
 		//TODO: APPEND FIRST LINE (see below)
 		
@@ -128,6 +139,7 @@ public class DataLogger {
 				e.printStackTrace();
 			}
 		}
+		sessionLogCharList.clear();
 		
 	}
 	

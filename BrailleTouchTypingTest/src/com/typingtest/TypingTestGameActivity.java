@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -14,12 +15,15 @@ import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.View;
 import android.view.WindowManager;
+import android.view.View.OnClickListener;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationSet;
 import android.view.animation.ScaleAnimation;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -46,7 +50,7 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
 	AnimationSet completedAnimationSet;
 	boolean didLastCall;
 
-	float totalLetters, correctLetters, wrongLetters;
+	float totalLetters, correctLetters, wrongLetters, wpm;
 	private long startTime;
 
 	// Timer
@@ -132,6 +136,13 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
 				setupGame();
 			};
 		});
+		
+		final Button stop = (Button) findViewById(R.id.stop_button);
+        stop.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+            	onDestroy();
+            }
+        });
 
 	}
 
@@ -158,9 +169,10 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
 		DecimalFormat format = new DecimalFormat("##.##");
 		double totalError = StatsCalc.getTotalError(sentence, typed);
 		Log.e("TOT ERR: ", String.valueOf(totalError));
+		wpm = ((float) completedWords * 60f) / ((float) totalSeconds);
+		dataLogger.addWordToSessionLog(sentence, wpm, totalError);
 		errorPercentage.setText("Total Error: "	+ format.format(totalError*100.0) + "%" + "\n"
-								+ "WPM: " + format.format((((float) completedWords * 60f) / (float) totalSeconds)));
-
+								+ "WPM: " + format.format(wpm));
 	}
 
 	/**
@@ -239,7 +251,7 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
 			
 			// simulates data from back
 			dataLogger.addKeyStrokeToSessionLog("\r");
-
+			
 			updateError(targetWord, dataLogger.getSessionCharListAsString());
 			
 			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
