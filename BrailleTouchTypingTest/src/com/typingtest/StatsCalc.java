@@ -7,9 +7,8 @@ public class StatsCalc {
 	public static int[] statsMSD(String sentence, String typed) {
 		ArrayList<String> typedList = new ArrayList<String>();
 		for(int i = 0; i < typed.length(); i++) {
-			typedList.add(typed.charAt(i)+"");
-			if(typed.charAt(i) == (char)8 || typed.charAt(i) == (char)13) {
-				typedList.remove(i);
+			if((typed.charAt(i) != (char)8) && (typed.charAt(i) != (char)13)) {
+				typedList.add(typed.charAt(i)+"");
 			}
 		}
 		int i, j;
