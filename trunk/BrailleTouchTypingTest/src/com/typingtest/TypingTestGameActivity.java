@@ -156,8 +156,9 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
 
 	private void updateError(String sentence, String typed) {
 		DecimalFormat format = new DecimalFormat("##.##");
-		Log.e("TOT ERR: ", String.valueOf(StatsCalc.getTotalError(sentence, typed)));
-		errorPercentage.setText("Total Error: "	+ format.format(StatsCalc.getTotalError(sentence, typed)*100.0) + "%" + "\n"
+		double totalError = StatsCalc.getTotalError(sentence, typed);
+		Log.e("TOT ERR: ", String.valueOf(totalError));
+		errorPercentage.setText("Total Error: "	+ format.format(totalError*100.0) + "%" + "\n"
 								+ "WPM: " + format.format((((float) completedWords * 60f) / (float) totalSeconds)));
 
 	}
