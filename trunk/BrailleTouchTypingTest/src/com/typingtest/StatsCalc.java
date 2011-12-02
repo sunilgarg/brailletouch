@@ -1,13 +1,24 @@
 package com.typingtest;
 
-import java.lang.Math;
+import java.util.ArrayList;
 
 public class StatsCalc {
 
 	public static int[] statsMSD(String sentence, String typed) {
+		ArrayList<String> typedList = new ArrayList<String>();
+		for(int i = 0; i < typed.length(); i++) {
+			typedList.add(typed.charAt(i)+"");
+			if(typed.charAt(i) == (char)8 || typed.charAt(i) == (char)13) {
+				typedList.remove(i);
+			}
+		}
 		int i, j;
 		String a = " " + sentence;
-		String b = " " + typed;
+		String b = " ";
+		for(int k = 0; k < typedList.size(); k++) {
+			b += typedList.get(k);
+		}
+		b = b.toLowerCase();
 
 		// minimum string distance (insertions, deletions, and substitutions)
 		int[][] msd = new int[a.length()][b.length()];
@@ -99,7 +110,7 @@ public class StatsCalc {
 
 	public static int statsIF(String sentence, String typed) {
 		// IF = Incorrect, but Fixed
-		return typed.length() - statsF(typed);
+		return ((typed.length() - sentence.length()) - statsF(typed));
 	}// end statsIF (String,String,Vector)
 
 	public static int statsC(String sentence, String typed) {
@@ -139,6 +150,10 @@ public class StatsCalc {
 	
 	public static double getTotalError(String sentence, String typed) {
 		int [] ret = statsALL(sentence, typed);
+		int zero = ret[0];
+		int one = ret[1];
+		int two = ret[2];
+		int three = ret[3];
 		double totalError = ((double) (ret[3] + ret[2])) / ((double) (ret[0] + ret[3] + ret[2]));
 		return totalError;
 	}
