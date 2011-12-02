@@ -1,7 +1,10 @@
 package com.typingtest;
 
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -10,26 +13,38 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.Environment;
+import android.util.Log;
 
 public class DataLogger {
 	
-	static final String DATAFILE = "typingTestStorage";
+	static final String DATADIR = "typingTestStorage";
 	private Activity owner;
 	private FileOutputStream persistentLog;
 	private FileOutputStream sessionLog;
 	private Calendar calendar;
 	private List<String> sessionLogCharList;
+	private String sessionLogChars;
+	private String sessionLogCharsSave;
 	private Date time;
 	private String timeString;
+	private String storagePath;
+	private File SDsessionLog;
+	FileWriter SDsessionLogWriter;
+    BufferedWriter SDsessionLogOut; 
 	
 	public DataLogger(Context c) {
 		
 		owner = (Activity) c;
 		sessionLogCharList = new ArrayList<String>();
+		sessionLogChars = "";
 		calendar = Calendar.getInstance();
 		time = calendar.getTime();
 		timeString = time.toGMTString();
-			
+		timeString = timeString.replace(':', '_');
+    	timeString = timeString.replace(' ', '_');
+		
+		/*
     	try {
     	    persistentLog = c.openFileOutput(DATAFILE, Context.MODE_APPEND);
 		} catch (FileNotFoundException e) {
@@ -43,6 +58,25 @@ public class DataLogger {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+    	*/
+    	storagePath = c.getFilesDir().getPath();
+    	
+    	String sessionLogName = timeString.concat(".txt");
+    	try {
+    	    File root = Environment.getExternalStorageDirectory();
+    	    File SDsessionDir = new File(root, DATADIR);
+    	    SDsessionDir.mkdirs();
+    	        SDsessionLog = new File(SDsessionDir, sessionLogName);
+    	   
+    	        if(!SDsessionLog.exists()) {
+    	        	SDsessionLog.createNewFile();
+    	        }
+    	        SDsessionLogWriter = new FileWriter(SDsessionLog);
+    	        SDsessionLogOut = new BufferedWriter(SDsessionLogWriter);
+    	   
+    	} catch (IOException e) {
+    	   
+    	}
     	
 	}
 	
@@ -62,11 +96,19 @@ public class DataLogger {
 			key = in.charAt(0);
 		}
 		
-		line = String.valueOf(nanos + "   " + String.valueOf((int)key) + " " + String.valueOf(key)) + "\n";
+		if (String.valueOf((int)key).length() < 3) {
+		line = String.valueOf(nanos + "   " + String.valueOf((int)key) + "  " + String.valueOf(key)) + "\n";
+		}
+		else {
+			line = String.valueOf(nanos + "   " + String.valueOf((int)key) + " " + String.valueOf(key)) + "\n";
+		}
 		sessionLogCharList.add(line);
+		sessionLogChars += String.valueOf(key);
 		
 		if(in.equals("\r")) {
 			addWordToSessionLog();
+			sessionLogCharsSave = sessionLogChars;
+			sessionLogChars = "";
 			sessionLogCharList.clear();
 		}
 		
@@ -79,7 +121,8 @@ public class DataLogger {
 		
 		for (int i = 0; i < sessionLogCharList.size(); i+=1) {
 			try {
-				sessionLog.write(sessionLogCharList.get(i).getBytes());
+				//sessionLog.write(sessionLogCharList.get(i).getBytes());
+				SDsessionLogOut.write(sessionLogCharList.get(i));
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -89,14 +132,22 @@ public class DataLogger {
 	}
 	
 	public String getSessionCharListAsString() {
-		String retString = "";
-		for(int i = 0; i < sessionLogCharList.size(); i++) {
-			retString += sessionLogCharList.get(i);
-		}
-		
-		return retString;
+		return sessionLogCharsSave.substring(0, sessionLogCharsSave.length()-1);
 	}
 
+	public void closeDataLogger() {
+		
+		try {
+			//persistentLog.close();
+			//sessionLog.close();
+			SDsessionLogOut.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
 }
 
 /*

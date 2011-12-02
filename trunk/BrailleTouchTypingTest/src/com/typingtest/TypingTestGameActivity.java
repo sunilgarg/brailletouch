@@ -13,6 +13,7 @@ import android.os.PowerManager;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
@@ -43,6 +44,7 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
 	int completedWords = 0;
 	ScaleAnimation completedAnimation;
 	AnimationSet completedAnimationSet;
+	boolean didLastCall;
 
 	float totalLetters, correctLetters, wrongLetters;
 	private long startTime;
@@ -74,6 +76,8 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.game);
 
+		didLastCall = false;
+		
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		mWakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK, "My Tag");
 		mWakeLock.acquire();
@@ -151,8 +155,9 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
 	}
 
 	private void updateError(String sentence, String typed) {
-		DecimalFormat format = new DecimalFormat("##");
-		errorPercentage.setText("Total Error: "	+ format.format(StatsCalc.getTotalError(sentence, typed)) + "%" + "\n"
+		DecimalFormat format = new DecimalFormat("##.##");
+		Log.e("TOT ERR: ", String.valueOf(StatsCalc.getTotalError(sentence, typed)));
+		errorPercentage.setText("Total Error: "	+ format.format(StatsCalc.getTotalError(sentence, typed)*100.0) + "%" + "\n"
 								+ "WPM: " + format.format((((float) completedWords * 60f) / (float) totalSeconds)));
 
 	}
@@ -173,6 +178,13 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
 
 		// takes care of useless calls - second condition corresponds to call
 		// that happens when keyboard is forced down
+		
+		//hacking around bluetooth-less testing
+		if (didLastCall == true) {
+			didLastCall = false;
+			return;
+		}
+		
 		if ((s.length() == enteredWord.length()) || (enteredWord.length() - s.length() > 1)) {
 			return;
 		} else if (s.length() < enteredWord.length()) {
@@ -222,12 +234,13 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
 
 		// Check for word completed
 		if (targetWordIndex >= targetWord.length()) {
-			
-			updateError(targetWord, dataLogger.getSessionCharListAsString());
+			didLastCall = true;
 			
 			// simulates data from back
 			dataLogger.addKeyStrokeToSessionLog("\r");
 
+			updateError(targetWord, dataLogger.getSessionCharListAsString());
+			
 			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 			imm.hideSoftInputFromWindow(enteredWordLabel.getWindowToken(), 0);
 			enteredWordLabel.startAnimation(completedAnimationSet);
@@ -247,6 +260,7 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		dataLogger.closeDataLogger();
 		mWakeLock.release();
 
 	}
