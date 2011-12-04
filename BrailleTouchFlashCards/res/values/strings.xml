@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BrailleTouch Flash Cards</string>
+    <string name="start">Start Game</string>
+    <string name="hint">Hint</string>    
+    <string name="seconds_left_label">Seconds Left</string>
+    <string name="num_correct_label">Letters Correct</string>
+</resources>
