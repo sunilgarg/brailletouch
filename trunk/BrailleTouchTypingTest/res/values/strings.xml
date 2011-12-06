@@ -14,5 +14,5 @@
         <item>lazy</item>
         <item>dog</item>
     </string-array>
-        <string name="stop">Stop</string>
+    <string name="stop">Stop</string>
 </resources>
