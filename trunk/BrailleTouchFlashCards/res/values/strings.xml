@@ -2,7 +2,11 @@
 <resources>
     <string name="app_name">BrailleTouch Flash Cards</string>
     <string name="start">Start Game</string>
+    <string name="restart">Play Again</string>
     <string name="hint">Hint</string>    
     <string name="seconds_left_label">Seconds Left</string>
     <string name="num_correct_label">Letters Correct</string>
+    <string name="game_start">Welcome</string>
+    <string name="game_over">Game Over</string>
+    <string name="game_start_sub">Get as many letters as you can!</string>
 </resources>
