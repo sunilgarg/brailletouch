@@ -20,6 +20,7 @@ import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationSet;
 import android.view.animation.TranslateAnimation;
@@ -33,6 +34,7 @@ public class FlashCardsGameActivity extends Activity implements
 		ViewSwitcher.ViewFactory, OnTouchListener, OnClickListener {
 	private Button hintButton;
 	private TextSwitcher letterSwitcher;
+	private TextView inputFeedbackText;
 	private TextView numCorrect;
 	private TextView numSeconds;
 	private FrameLayout hintFrame;
@@ -64,6 +66,7 @@ public class FlashCardsGameActivity extends Activity implements
 
 		hintButton = (Button) findViewById(R.id.hint_button);
 		letterSwitcher = (TextSwitcher) findViewById(R.id.letter_switcher);
+		inputFeedbackText = (TextView) findViewById(R.id.input_feedback_text);
 		numCorrect = (TextView) findViewById(R.id.num_correct);
 		numSeconds = (TextView) findViewById(R.id.seconds_left);
 		hintFrame = (FrameLayout) findViewById(R.id.hintFrame);
@@ -76,6 +79,8 @@ public class FlashCardsGameActivity extends Activity implements
 		letterSwitcher.setOnTouchListener(this);
 		
 		hintTimer = new HintTimer(HINT_DELAY_MS, HINT_DELAY_MS);
+		
+		flashInputFeedback(); // this is a hack; for some reason it doesn't show up the first time.
 		
 		Display disp = ((WindowManager)this.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
 		int frameWidth = disp.getWidth();
@@ -95,9 +100,8 @@ public class FlashCardsGameActivity extends Activity implements
 		}
 
 		hintAnim = new AlphaAnimation(0.00f,1.00f);
-        hintAnim.setDuration(500);
+        hintAnim.setDuration(250);
         hintAnim.setAnimationListener(new AnimationListener() {
-
             public void onAnimationStart(Animation animation) {
             	hintFrame.setVisibility(View.VISIBLE);
             }
@@ -170,17 +174,30 @@ public class FlashCardsGameActivity extends Activity implements
 	}
 	
 	private void handleInput(String input) {
-		// TODO: provide some more visual feedback
 		if (isGameActive) {
 			if (input.equalsIgnoreCase(currentLetter)) {
 				numCorrect.setText(String.valueOf(++correctCount));
+				inputFeedbackText.setText("Correct!");
+				inputFeedbackText.setTextColor(Color.parseColor("#008000"));
+				flashInputFeedback();
 				changeLetter();
 			} else {
-				
+				inputFeedbackText.setText("Try Again.");
+				inputFeedbackText.setTextColor(Color.parseColor("#ff0000"));
+				flashInputFeedback();
 			}
 		}
 	}
 
+	private void flashInputFeedback() {
+        inputFeedbackText.setVisibility(View.VISIBLE);
+		Animation fadeOut = new AlphaAnimation(1.0f, 0.0f);
+		fadeOut.setStartOffset(400);
+		fadeOut.setDuration(750);
+        inputFeedbackText.startAnimation(fadeOut);
+        inputFeedbackText.setVisibility(View.INVISIBLE);
+	}
+	
 	private static final Animation inFromRightAnimation;
 	
 	static {
