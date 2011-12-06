@@ -7,7 +7,6 @@ import java.util.ArrayList;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -15,7 +14,9 @@ import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.View.OnKeyListener;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.animation.Animation;
@@ -28,7 +29,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class TypingTestGameActivity extends Activity implements TextWatcher {
+public class TypingTestGameActivity extends Activity {
 
 	InputPhraseManager inputPhraseManager;
 	DataLogger dataLogger;
@@ -108,7 +109,6 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
 		correctLetters = 0;
 		wrongLetters = 0;
 
-		enteredWordBox.addTextChangedListener(this);
 		startTimer();
 
 		// animation for when a word is completed
@@ -136,13 +136,120 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
 				setupGame();
 			};
 		});
-		
+	
 		final Button stop = (Button) findViewById(R.id.stop_button);
         stop.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-            	onDestroy();
+            	finish();
             }
         });
+	
+		this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+		enteredWordBox.setFocusableInTouchMode(true);
+		enteredWordBox.requestFocus();
+		enteredWordBox.addTextChangedListener(new TextWatcher() {
+		    @Override
+		    public void onTextChanged(CharSequence s, int start, int before, int count) { }
+		    @Override
+		    public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+		    @Override
+			public void afterTextChanged(Editable s) {
+				if (didLastCall == true) {
+					didLastCall = false;
+					return;
+				}
+				
+				if ((s.length() == enteredWord.length()) || (enteredWord.length() - s.length() > 1)) {
+					return;
+				} else if (s.length() < enteredWord.length()) {
+					// this is backspace
+					if (targetWordIndex > 0) {
+						enteredWordHTML.remove(enteredWordHTML.size() - 1);
+						enteredWord = enteredWord
+								.substring(0, enteredWord.length() - 1);
+						//Toast.makeText(this, "backspace", Toast.LENGTH_SHORT).show();
+						targetWordIndex -= 1;
+						dataLogger.addKeyStrokeToSessionLog("\b");
+					}
+				} else {
+					// new char added
+					String typed = String.valueOf(s.charAt(s.length() - 1));
+					enteredWord += typed;
+					
+					// Show letters typed correctly in green, incorrect letter in red
+					if (typed.equalsIgnoreCase(String.valueOf(targetWord.charAt(targetWordIndex)))) {
+						enteredWordHTML.add("<font color=#0000ff>" + typed + "</font>");
+						correctLetters += 1;
+					} else {
+						enteredWordHTML.add("<font color=#ff0000>" + typed + "</font>");
+						wrongLetters += 1;
+					}
+					targetWordIndex += 1;
+
+					// simulates data from back
+					dataLogger.addKeyStrokeToSessionLog(typed);
+
+				}
+
+				enteredWord = String.valueOf(s);
+				// display word
+				String typedText = "";
+				for (int i = 0; i < enteredWordHTML.size(); i += 1) {
+					typedText += enteredWordHTML.get(i);
+				}
+				enteredWordLabel.setText(Html.fromHtml(typedText));
+
+				// Compute error percentage
+				totalLetters = correctLetters + wrongLetters;
+				
+
+				// Check for word completed
+				if (targetWordIndex >= targetWord.length()) {
+					didLastCall = true;
+					
+					// simulates data from back
+					dataLogger.addKeyStrokeToSessionLog("\r");
+
+					updateError(targetWord, dataLogger.getSessionCharListAsString());
+					
+					//InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+					//imm.hideSoftInputFromWindow(enteredWordLabel.getWindowToken(), 0);
+					enteredWordLabel.startAnimation(completedAnimationSet);
+					// defined in onCreate
+					/*
+					 * public void onAnimationEnd(Animation anim) { setupGame(); };
+					 */
+				}
+			}
+		});
+		
+		enteredWordBox.setOnKeyListener(new OnKeyListener()
+		{
+		    public boolean onKey(View v, int keyCode, KeyEvent event)
+		    {
+		        if (event.getAction() == KeyEvent.ACTION_DOWN)
+		        {
+		            switch (keyCode)
+		            {
+		                case KeyEvent.KEYCODE_DPAD_CENTER:
+		                case KeyEvent.KEYCODE_ENTER:
+		                   	dataLogger.addKeyStrokeToSessionLog("\r");
+							updateError(targetWord, dataLogger.getSessionCharListAsString());
+							completedWords++;
+							enteredWordLabel.startAnimation(completedAnimationSet);
+							// defined in onCreate
+							/*
+							 * public void onAnimationEnd(Animation anim) { setupGame(); };
+							 */
+		                    return true;
+		                default:
+		                    break;
+		            }
+		        }
+		        return false;
+		    }
+		});
+
 
 	}
 
@@ -174,16 +281,9 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
 		errorPercentage.setText("Total Error: "	+ format.format(totalError*100.0) + "%" + "\n"
 								+ "WPM: " + format.format(wpm));
 	}
-
-	/**
-	 * Called when a character is entered.
-	 */
-	@Override
-	public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-	}
-
-	@Override
+	
+	
+	/*@Override
 	public void afterTextChanged(Editable s) {
 		// this eventually needs to be adapted to receiving only individual
 		// chars, "\b" and "\r",
@@ -251,24 +351,20 @@ public class TypingTestGameActivity extends Activity implements TextWatcher {
 			
 			// simulates data from back
 			dataLogger.addKeyStrokeToSessionLog("\r");
-			
+
 			updateError(targetWord, dataLogger.getSessionCharListAsString());
 			
 			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 			imm.hideSoftInputFromWindow(enteredWordLabel.getWindowToken(), 0);
 			enteredWordLabel.startAnimation(completedAnimationSet);
 			// defined in onCreate
-			/*
+			
 			 * public void onAnimationEnd(Animation anim) { setupGame(); };
-			 */
-		}
-	}
+			 
+		} 
+	}*/
+	
 
-	@Override
-	public void beforeTextChanged(CharSequence s, int start, int count,
-			int after) {
-		// DO NOTHING
-	}
 
 	@Override
 	protected void onDestroy() {
