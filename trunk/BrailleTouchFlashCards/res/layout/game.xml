@@ -11,6 +11,7 @@
     android:background="#ffffff"
     android:gravity="center"
     >
+    
 		<TextView 
 		    android:id="@+id/game_start_text"
 		    android:layout_width="wrap_content" 
@@ -73,6 +74,11 @@
 				    android:textSize="20pt"
 				    android:visibility="invisible"
 				    />
+				    
+	  			 <EditText
+    				android:id="@+id/et"
+    			  android:layout_width="wrap_content" android:layout_height="wrap_content">
+    			</EditText>
 			
 			</LinearLayout>
 			

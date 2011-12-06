@@ -9,6 +9,10 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.PowerManager;
+import android.text.Editable;
+import android.text.Html;
+import android.text.TextWatcher;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -25,6 +29,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
 import android.view.animation.Animation.AnimationListener;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
@@ -41,9 +46,11 @@ public class FlashCardsGameActivity extends Activity implements
 	private TextView numSeconds;
 	private TextView gameStartText;
 	private TextView gameStartSubtext;
+	private EditText et;
 	private FrameLayout hintFrame;
 	private HintDot[] hintDots = new HintDot[6];
 	private Animation hintAnim;
+	private PowerManager.WakeLock mWakeLock;
 
 	private Random r;
 	private HintTimer hintTimer;
@@ -65,6 +72,10 @@ public class FlashCardsGameActivity extends Activity implements
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
+		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+		mWakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK, "My Tag");
+		mWakeLock.acquire();
+		
 		r = new Random();
 
 		setContentView(R.layout.game);
@@ -79,6 +90,24 @@ public class FlashCardsGameActivity extends Activity implements
 		gameStartText = (TextView) findViewById(R.id.game_start_text);
 		gameStartSubtext = (TextView) findViewById(R.id.game_start_subtext);
 		hintFrame = (FrameLayout) findViewById(R.id.hintFrame);
+		et = (EditText) findViewById(R.id.et);
+		//et.setVisibility(View.INVISIBLE);
+		this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+		et.setFocusableInTouchMode(true);
+		et.requestFocus();
+		et.addTextChangedListener(new TextWatcher() {
+		    @Override
+		    public void onTextChanged(CharSequence s, int start, int before, int count) { }
+		    @Override
+		    public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+		    @Override
+			public void afterTextChanged(Editable s) {
+		    	int len = s.length();
+				if(len > 0) {
+					handleInput(String.valueOf(s.charAt(len-1)));
+				}
+			}
+		});
 
 		hintButton.setOnClickListener(this);
 		startButton.setOnClickListener(this);
@@ -113,7 +142,7 @@ public class FlashCardsGameActivity extends Activity implements
 		}
 
 		hintAnim = new AlphaAnimation(0.00f,1.00f);
-        hintAnim.setDuration(250);
+        hintAnim.setDuration(2000);
         hintAnim.setAnimationListener(new AnimationListener() {
             public void onAnimationStart(Animation animation) {
             	hintFrame.setVisibility(View.VISIBLE);
@@ -125,6 +154,8 @@ public class FlashCardsGameActivity extends Activity implements
             public void onAnimationEnd(Animation animation) {
             }
         });
+        
+
 	}
 
 	private void startGame() {
@@ -328,5 +359,12 @@ public class FlashCardsGameActivity extends Activity implements
 	        super.onDraw(canvas);
 	        canvas.drawCircle(x, y, r, mPaint);
 	    }
+	}
+	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		mWakeLock.release();
+
 	}
 }
