@@ -13,17 +13,17 @@ import android.view.Display;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationSet;
+import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
+import android.view.animation.Animation.AnimationListener;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextSwitcher;
@@ -33,10 +33,14 @@ import android.widget.ViewSwitcher;
 public class FlashCardsGameActivity extends Activity implements
 		ViewSwitcher.ViewFactory, OnTouchListener, OnClickListener {
 	private Button hintButton;
+	private Button startButton;
+	private ViewSwitcher screenSwitcher;
 	private TextSwitcher letterSwitcher;
 	private TextView inputFeedbackText;
 	private TextView numCorrect;
 	private TextView numSeconds;
+	private TextView gameStartText;
+	private TextView gameStartSubtext;
 	private FrameLayout hintFrame;
 	private HintDot[] hintDots = new HintDot[6];
 	private Animation hintAnim;
@@ -48,6 +52,7 @@ public class FlashCardsGameActivity extends Activity implements
 	private int correctCount;
 	private String currentLetter;
 
+	private static final boolean INPUT_HACK_ON = false;
 	private static final int GAME_LENGTH_MS = 60000;
 	private static final int HINT_DELAY_MS = 3000;
 	
@@ -65,13 +70,21 @@ public class FlashCardsGameActivity extends Activity implements
 		setContentView(R.layout.game);
 
 		hintButton = (Button) findViewById(R.id.hint_button);
+		startButton = (Button) findViewById(R.id.start_button);
+		screenSwitcher = (ViewSwitcher) findViewById(R.id.screen_switcher);
 		letterSwitcher = (TextSwitcher) findViewById(R.id.letter_switcher);
 		inputFeedbackText = (TextView) findViewById(R.id.input_feedback_text);
 		numCorrect = (TextView) findViewById(R.id.num_correct);
 		numSeconds = (TextView) findViewById(R.id.seconds_left);
+		gameStartText = (TextView) findViewById(R.id.game_start_text);
+		gameStartSubtext = (TextView) findViewById(R.id.game_start_subtext);
 		hintFrame = (FrameLayout) findViewById(R.id.hintFrame);
 
 		hintButton.setOnClickListener(this);
+		startButton.setOnClickListener(this);
+		
+		screenSwitcher.setInAnimation(AnimationUtils.loadAnimation(this, android.R.anim.fade_in));
+		screenSwitcher.setOutAnimation(AnimationUtils.loadAnimation(this, android.R.anim.fade_out));
 		
 		letterSwitcher.setFactory(this);
 		letterSwitcher.setInAnimation(inFromRightAnimation);
@@ -111,14 +124,14 @@ public class FlashCardsGameActivity extends Activity implements
 
             public void onAnimationEnd(Animation animation) {
             }
-        });        
-
-		startGame();
+        });
 	}
 
 	private void startGame() {
 		isGameActive = true;
+		numCorrect.setText("0");
 		correctCount = 0;
+		
 		changeLetter();
 				
 		new CountDownTimer(GAME_LENGTH_MS, 1000) {
@@ -131,7 +144,10 @@ public class FlashCardsGameActivity extends Activity implements
 			public void onFinish() {
 				numSeconds.setText("0");
 				isGameActive = false;
-				// TODO: do something here because the game is over
+				gameStartText.setText(R.string.game_over);
+				gameStartSubtext.setText(String.format("You got %d letter%s correct!", correctCount, correctCount == 1 ? "" : "s"));
+				startButton.setText(R.string.restart);
+				screenSwitcher.showPrevious();
 			}
 		}.start();
 	}
@@ -254,17 +270,27 @@ public class FlashCardsGameActivity extends Activity implements
 
 	@Override
 	public boolean onTouch(View arg0, MotionEvent arg1) {
-		// TODO: get rid of this hack
-		
-		String fakeInput = "";
-		
-		if (arg1.getX() < arg0.getWidth() / 2) {
-			fakeInput = currentLetter;
+		if (INPUT_HACK_ON) {
+			String fakeInput = "";
+			
+			if (arg1.getX() < arg0.getWidth() / 2) {
+				fakeInput = currentLetter;
+			}
+			
+			handleInput(fakeInput);
 		}
-		
-		handleInput(fakeInput);
-
 		return false;
+	}
+	
+	@Override
+	public void onClick(View view) {		
+		if (view == hintButton) {
+			hintFrame.startAnimation(hintAnim);
+			hintButton.setEnabled(false);
+		} else if (view == startButton) {
+			screenSwitcher.showNext();
+			startGame();
+		}
 	}
 	
 	private class HintTimer extends CountDownTimer {
@@ -283,15 +309,7 @@ public class FlashCardsGameActivity extends Activity implements
 		}
 	}
 	
-	@Override
-	public void onClick(View view) {
-		if (view == hintButton) {
-			hintFrame.startAnimation(hintAnim);
-			hintButton.setEnabled(false);
-		}
-	}
-	
-	public class HintDot extends View {
+	private class HintDot extends View {
 	    private final float x;
 	    private final float y;
 	    private final int r;

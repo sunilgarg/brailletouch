@@ -1,104 +1,148 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-   	android:layout_height="fill_parent" 
+<ViewSwitcher xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/screen_switcher"
+    android:layout_height="fill_parent" 
    	android:layout_width="fill_parent" >
-
-	<LinearLayout 
-	    android:orientation="horizontal"
-	    android:layout_width="fill_parent"
-	    android:layout_height="fill_parent"
-	    android:background="#ffffff"
-	    >
-	
-	    <LinearLayout android:orientation="vertical"
-		    android:layout_width="fill_parent"
-		    android:layout_height="fill_parent"
-		    android:layout_weight="1"
-		    >
+   
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#ffffff"
+    android:gravity="center"
+    >
+		<TextView 
+		    android:id="@+id/game_start_text"
+		    android:layout_width="wrap_content" 
+		    android:layout_height="wrap_content" 
+		    android:layout_gravity="center"
+		    android:text="@string/game_start"
+		    android:textSize="20pt"
+		    android:textColor="#000000"
+		    />
 	    
-			<TextSwitcher  
-				android:id="@+id/letter_switcher"
-			    android:layout_width="fill_parent" 
-			    android:layout_height="wrap_content" 
-			    android:gravity="center"
-			    />
-			
-			<TextView 
-			    android:id="@+id/input_feedback_text"
-			    android:layout_width="wrap_content" 
-			    android:layout_height="wrap_content" 
-			    android:layout_gravity="center"
-			    android:textSize="20pt"
-			    android:visibility="invisible"
-			    />
+		<TextView 
+		    android:id="@+id/game_start_subtext"
+		    android:layout_width="wrap_content" 
+		    android:layout_height="wrap_content" 
+		    android:layout_gravity="center"
+		    android:layout_marginBottom="25dp"
+		    android:text="@string/game_start_sub"
+		    android:textSize="14pt"
+		    android:textColor="#000000"
+		    />
 		
-		</LinearLayout>
-		
-		<LinearLayout android:orientation="vertical"
+		<Button
+		    android:id="@+id/start_button"
+		    android:layout_gravity="center"
+		    android:layout_height="100dp"
+		    android:layout_width="300dp"
+		    android:text="@string/start"
+		    android:textSize="14pt"></Button>
+	</LinearLayout>
+    
+	<FrameLayout 
+	   	android:layout_height="fill_parent" 
+	   	android:layout_width="fill_parent" >
+	
+		<LinearLayout 
+		    android:orientation="horizontal"
 		    android:layout_width="fill_parent"
 		    android:layout_height="fill_parent"
-		    android:background="#cccccc"
-		    android:layout_weight="2"
+		    android:background="#ffffff"
 		    >
-		    
-			<Button
-			    android:id="@+id/hint_button"
-			    android:layout_gravity="center"
-			    android:layout_height="50dp"
-			    android:layout_width="170dp"
-			    android:layout_marginTop="10dp"
-			    android:text="@string/hint"
-			    android:textSize="12pt"></Button>
 		
-			<TextView  
-			    android:id="@+id/num_correct"
-			    android:layout_width="wrap_content" 
-			    android:layout_height="wrap_content" 
-			    android:layout_gravity="center"
-			    android:layout_marginTop="10dp"
-			    android:layout_marginBottom="-10dp"
-			    android:textColor="#000000"
-			    android:textSize="30pt"
-			    android:text="0"
-			    />
+		    <LinearLayout android:orientation="vertical"
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent"
+			    android:layout_weight="1"
+			    >
+		    
+				<TextSwitcher  
+					android:id="@+id/letter_switcher"
+				    android:layout_width="fill_parent" 
+				    android:layout_height="wrap_content" 
+				    android:gravity="center"
+				    />
+				
+				<TextView 
+				    android:id="@+id/input_feedback_text"
+				    android:layout_width="wrap_content" 
+				    android:layout_height="wrap_content" 
+				    android:layout_gravity="center"
+				    android:textSize="20pt"
+				    android:visibility="invisible"
+				    />
 			
-			<TextView  
-			    android:layout_width="wrap_content" 
-			    android:layout_height="wrap_content" 
-			    android:layout_gravity="center"
-			    android:textColor="#000000"
-			    android:textSize="8pt"
-			    android:text="@string/num_correct_label"
-			    />
-			    	
-			<TextView  
-			    android:id="@+id/seconds_left"
-			    android:layout_width="wrap_content" 
-			    android:layout_height="wrap_content" 
-			    android:layout_gravity="center"
-			    android:layout_marginTop="10dp"
-			    android:layout_marginBottom="-10dp"
-			    android:textColor="#000000"
-			    android:textSize="30pt"
-			    android:text="0"
-			    />
+			</LinearLayout>
+			
+			<LinearLayout android:orientation="vertical"
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent"
+			    android:background="#cccccc"
+			    android:layout_weight="2"
+			    >
 			    
-			<TextView  
-			    android:layout_width="wrap_content" 
-			    android:layout_height="wrap_content" 
-			    android:layout_gravity="center"
-			    android:textColor="#000000"
-			    android:textSize="8pt"
-			    android:text="@string/seconds_left_label"
-			    />
+				<Button
+				    android:id="@+id/hint_button"
+				    android:layout_gravity="center"
+				    android:layout_height="50dp"
+				    android:layout_width="170dp"
+				    android:layout_marginTop="10dp"
+				    android:text="@string/hint"
+				    android:textSize="12pt"></Button>
 			
+				<TextView  
+				    android:id="@+id/num_correct"
+				    android:layout_width="wrap_content" 
+				    android:layout_height="wrap_content" 
+				    android:layout_gravity="center"
+				    android:layout_marginTop="10dp"
+				    android:layout_marginBottom="-10dp"
+				    android:textColor="#000000"
+				    android:textSize="30pt"
+				    android:text="0"
+				    />
+				
+				<TextView  
+				    android:layout_width="wrap_content" 
+				    android:layout_height="wrap_content" 
+				    android:layout_gravity="center"
+				    android:textColor="#000000"
+				    android:textSize="8pt"
+				    android:text="@string/num_correct_label"
+				    />
+				    	
+				<TextView  
+				    android:id="@+id/seconds_left"
+				    android:layout_width="wrap_content" 
+				    android:layout_height="wrap_content" 
+				    android:layout_gravity="center"
+				    android:layout_marginTop="10dp"
+				    android:layout_marginBottom="-10dp"
+				    android:textColor="#000000"
+				    android:textSize="30pt"
+				    android:text="0"
+				    />
+				    
+				<TextView  
+				    android:layout_width="wrap_content" 
+				    android:layout_height="wrap_content" 
+				    android:layout_gravity="center"
+				    android:textColor="#000000"
+				    android:textSize="8pt"
+				    android:text="@string/seconds_left_label"
+				    />
+				
+			</LinearLayout>
+		
 		</LinearLayout>
-	
-	</LinearLayout>
-	
-	<FrameLayout
-	   	android:id="@+id/hintFrame" 
-	   	android:layout_height="fill_parent" 
-	   	android:layout_width="fill_parent" />
-	   	
-</FrameLayout>
+		
+		<FrameLayout
+		   	android:id="@+id/hintFrame" 
+		   	android:layout_height="fill_parent" 
+		   	android:layout_width="fill_parent" />
+		   	
+	</FrameLayout>
+	    
+</ViewSwitcher>
