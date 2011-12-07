@@ -134,6 +134,7 @@ public class TypingTestGameActivity extends Activity {
 
 			public void onAnimationEnd(Animation anim) {
 				setupGame();
+				enteredWordBox.requestFocus();
 			};
 		});
 	
@@ -177,13 +178,18 @@ public class TypingTestGameActivity extends Activity {
 					enteredWord += typed;
 					
 					// Show letters typed correctly in green, incorrect letter in red
-					if (typed.equalsIgnoreCase(String.valueOf(targetWord.charAt(targetWordIndex)))) {
+					if (targetWordIndex >= targetWord.length()) {
+						enteredWordHTML.add("<font color=#ff0000>" + typed + "</font>");
+						wrongLetters += 1;
+					}
+					else if (typed.equalsIgnoreCase(String.valueOf(targetWord.charAt(targetWordIndex)))) {
 						enteredWordHTML.add("<font color=#0000ff>" + typed + "</font>");
 						correctLetters += 1;
 					} else {
 						enteredWordHTML.add("<font color=#ff0000>" + typed + "</font>");
 						wrongLetters += 1;
 					}
+					
 					targetWordIndex += 1;
 
 					// simulates data from back
@@ -202,24 +208,6 @@ public class TypingTestGameActivity extends Activity {
 				// Compute error percentage
 				totalLetters = correctLetters + wrongLetters;
 				
-
-				// Check for word completed
-				if (targetWordIndex >= targetWord.length()) {
-					didLastCall = true;
-					
-					// simulates data from back
-					dataLogger.addKeyStrokeToSessionLog("\r");
-
-					updateError(targetWord, dataLogger.getSessionCharListAsString());
-					
-					//InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-					//imm.hideSoftInputFromWindow(enteredWordLabel.getWindowToken(), 0);
-					enteredWordLabel.startAnimation(completedAnimationSet);
-					// defined in onCreate
-					/*
-					 * public void onAnimationEnd(Animation anim) { setupGame(); };
-					 */
-				}
 			}
 		});
 		
@@ -234,8 +222,8 @@ public class TypingTestGameActivity extends Activity {
 		                case KeyEvent.KEYCODE_DPAD_CENTER:
 		                case KeyEvent.KEYCODE_ENTER:
 		                   	dataLogger.addKeyStrokeToSessionLog("\r");
+		                   	completedWords++;
 							updateError(targetWord, dataLogger.getSessionCharListAsString());
-							completedWords++;
 							enteredWordLabel.startAnimation(completedAnimationSet);
 							// defined in onCreate
 							/*
@@ -276,7 +264,7 @@ public class TypingTestGameActivity extends Activity {
 		DecimalFormat format = new DecimalFormat("##.##");
 		double totalError = StatsCalc.getTotalError(sentence, typed);
 		Log.e("TOT ERR: ", String.valueOf(totalError));
-		wpm = ((float) completedWords * 60f) / ((float) totalSeconds);
+		wpm = ((float) completedWords * 4* 60f) / ((float) totalSeconds); //hack
 		dataLogger.addWordToSessionLog(sentence, wpm, totalError);
 		errorPercentage.setText("Total Error: "	+ format.format(totalError*100.0) + "%" + "\n"
 								+ "WPM: " + format.format(wpm));
