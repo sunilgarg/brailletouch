@@ -77,6 +77,7 @@ public class BluetoothBrailleSendService {
         mAdapter = BluetoothAdapter.getDefaultAdapter();
         mState = STATE_NONE;
         mHandler = handler;
+        start();
     }
 
     /**
