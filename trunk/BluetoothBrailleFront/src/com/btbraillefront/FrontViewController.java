@@ -10,6 +10,7 @@ import android.text.method.KeyListener;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.widget.Toast;
 
@@ -50,7 +51,7 @@ public class FrontViewController extends InputMethodService {
 	public void onCreate() {
 		super.onCreate();
 		
-		android.os.Debug.waitForDebugger();
+		android.os.Debug.waitForDebugger(); 
 		Log.i(TAG, "onCreate");
 		if (mSendService == null) setupService();
 		mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -60,17 +61,23 @@ public class FrontViewController extends InputMethodService {
             Toast.makeText(this, "Bluetooth is not available", Toast.LENGTH_LONG).show();
             return;
         }
-		
-		BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(MAC_ADDRESS);
+		/*
+        BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(MAC_ADDRESS);
         // Attempt to connect to the device
         mSendService.connect(device, true); //always secure
-		
+		*/
 		//appSettings = new AppSettings(this);
 		
 		//clickPlayer = MediaPlayer.create(this, SOUND_CLICK);
 		//backspacePlayer = MediaPlayer.create(this, SOUND_BACKSPACE);
 		//returnPlayer = MediaPlayer.create(this, SOUND_RETURN);
 		//undetectedPlayer = MediaPlayer.create(this, SOUND_UNDETECTED);
+	}
+	
+	@Override
+	public void onStartInput (EditorInfo attribute, boolean restarting) {
+		
+		
 	}
 
 	private void setupService() {
