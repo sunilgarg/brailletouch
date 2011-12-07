@@ -32,7 +32,7 @@
     	android:textColor="#0000ff"></TextView>
     <EditText
     	android:id="@+id/enteredWord"
-    	android:layout_gravity="center" android:layout_width="140dp" android:layout_height="wrap_content"></EditText>
+    	android:layout_gravity="center" android:layout_width="140dp" android:layout_height="wrap_content" android:singleLine="true"></EditText>
     <TextView
     	android:layout_gravity="center"
     	android:layout_height="wrap_content"
