@@ -70,11 +70,7 @@ public class TouchPadActivity extends Activity implements TextWatcher{
     	mWakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK, "My Tag");
 		mWakeLock.acquire();
     	
-    	//Bundle bundle = this.getIntent().getExtras();
-    	//device = (BluetoothDevice) bundle.get("device");
-    	
     	this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-    	
     	
     	mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
